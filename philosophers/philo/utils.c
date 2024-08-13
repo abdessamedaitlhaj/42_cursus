@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:43:42 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/08/10 09:31:28 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/08/13 19:50:32 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,16 +61,34 @@ int	ft_atoi(char const *str, char *flag)
 			sign *= -1;
 		str++;
 	}
-	if (!str)
-		return (*flag = 'f', 0);
+	if (!*str)
+	{
+		if (flag)
+			*flag = 'f';
+		return (0);
+	}
 	while (*str && ft_isdigit(*str))
 	{
 		sum = sum * 10 + sign * (*str - 48);
 		if (sum > 2147483647)
-			return (*flag = 'f', 0);
+		{
+			if (flag)
+				*flag = 'f';
+			return (0);
+		}
 		if (sum < -2147483648)
-			return (*flag = 'f', 0);
+		{
+			if (flag)
+				*flag = 'f';
+			return (0);
+		}
 		str++;
+	}
+	if (*str)
+	{
+		if (flag)
+			*flag = 'f';
+		return (0);
 	}
 	return (sum);
 }

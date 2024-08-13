@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:38:43 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/08/10 10:08:35 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/08/13 20:56:37 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,16 +20,24 @@
 #include <time.h>
 #include <pthread.h>
 
+typedef struct s_philo_args
+{
+	int		nb_philo;
+	int		time_to_die;
+	int		time_to_eat;
+	int		time_to_sleep;
+	int		nb_must_eat;
+}	t_philo_args;
+
 typedef struct s_philo
 {
 	int				id;
-	int				nb_philo;
-	int				time_to_die;
-	int				time_to_eat;
-	int				time_to_sleep;
-	int				nb_eat;
-	struct timeval	start;
-}				t_philo;
+	int				right_fork;
+	int				left_fork;
+	int				last_meal;
+	pthread_t		thread;
+	t_philo_args	*args;
+}	t_philo;
 
 void	error(void);
 void	free_args(char **args);
