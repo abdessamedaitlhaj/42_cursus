@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:38:43 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/08/13 20:56:37 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/08/13 22:23:55 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ typedef struct s_philo_args
 	int		time_to_eat;
 	int		time_to_sleep;
 	int		nb_must_eat;
+	pthread_mutex_t	*forks;
 }	t_philo_args;
 
 typedef struct s_philo
