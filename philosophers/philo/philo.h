@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:38:43 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/08/13 22:23:55 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/09/04 17:50:50 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,9 @@ typedef struct s_philo_args
 	int		time_to_sleep;
 	int		nb_must_eat;
 	pthread_mutex_t	*forks;
+	pthread_mutex_t	mutex_monitor;
+	int 	monitor;
+	int				life_time;
 }	t_philo_args;
 
 typedef struct s_philo
@@ -36,8 +39,15 @@ typedef struct s_philo
 	int				right_fork;
 	int				left_fork;
 	int				last_meal;
+	long			last_eat;
+	long			last_time;
+	int				eat_count;
 	pthread_t		thread;
 	t_philo_args	*args;
+	pthread_mutex_t	print;
+	pthread_mutex_t	mutex_eat_cnt;
+	pthread_mutex_t	mutex_last_eat;
+	pthread_mutex_t	mutex_eat_count;
 }	t_philo;
 
 void	error(void);
@@ -46,5 +56,9 @@ int		ft_atoi(char const *str, char *flag);
 int		ft_isspace(int c);
 int		ft_isdigit(int c);
 char	**ft_split(char const *s, char c);
+
+
+long	get_time(void);
+int	checking(t_philo_args *arg);
 
 #endif

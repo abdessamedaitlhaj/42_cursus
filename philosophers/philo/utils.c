@@ -6,17 +6,11 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:43:42 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/08/13 19:50:32 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/09/04 09:54:14 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "philo.h"
-
-void	error(void)
-{
-	write(2, "Error\n", 6);
-	exit(1);
-}
 
 void	free_args(char **args)
 {
