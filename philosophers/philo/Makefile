@@ -1,4 +1,4 @@
-SRCS =	philo.c utils.c utils2.c
+SRCS =	philo.c utils1.c utils2.c
 
 OBJS = $(SRCS:.c=.o)
 RM = rm -f

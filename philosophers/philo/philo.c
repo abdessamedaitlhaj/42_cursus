@@ -6,91 +6,35 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:40:28 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/09/04 17:51:24 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/09/08 18:11:58 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "philo.h"
 
-// static int	is_empty(char *str)
-// {
-// 	while (*str)
-// 	{
-// 		if (!ft_isspace(*str))
-// 			return (0);
-// 		str++;
-// 	}
-// 	return (1);
-// }
-
-void	ft_usleep(long sleep_time)
-{
-	long	start;
-
-	start = get_time();
-	while (start + (sleep_time * 1) > get_time())
-		usleep(100);
-}
-
 void	print(t_philo *philo, int id, char *str)
 {
 	long	now_time;
-
 	pthread_mutex_lock(&philo->print);
-	now_time = get_time() - philo->last_time;
+	now_time = get_time() - philo->start_time;
 	printf("%ld %d %s\n", now_time, id, str);
 	pthread_mutex_unlock(&philo->print);
 }
 
-void	change_monitor(t_philo_args *arg)
+void	change_monitor(t_philo_args *args)
 {
-	pthread_mutex_lock(&arg->mutex_monitor);
-	arg->monitor = 1;
-	pthread_mutex_unlock(&arg->mutex_monitor);
+	pthread_mutex_lock(&args->mutex_monitor);
+	args->monitor = 1;
+	pthread_mutex_unlock(&args->mutex_monitor);
 }
 
 long	last_eat(t_philo *philo)
 {
+	long	last;
 	pthread_mutex_lock(&philo->mutex_last_eat);
-	long last = philo->last_eat;
+	last = philo->last_eat;
 	pthread_mutex_unlock(&philo->mutex_last_eat);
 	return (last);
-}
-
-long	check_eat_cnt(t_philo *philo)
-{
-	pthread_mutex_lock(&philo->mutex_eat_count);
-	int eat_count = philo->eat_count;
-	pthread_mutex_unlock(&philo->mutex_eat_count);
-	return (eat_count);
-}
-
-void	monitoring(t_philo *philo, t_philo_args *arg)
-{
-	int		i;
-	long	now_time;
-
-	while (!checking(arg))
-	{
-		if (arg->nb_must_eat != 0 && check_eat_cnt(philo) == arg->nb_must_eat)
-		{
-			change_monitor(arg);
-			break ;
-		}
-		i = 0;
-		while (i < arg->nb_philo)
-		{
-			now_time = get_time();
-			if ((now_time - last_eat(&philo[i])) > arg->life_time)
-			{
-				print(&philo[i], philo[i].id, "died");
-				change_monitor(arg);
-				break ;
-			}
-			i++;
-		}
-		usleep(10);
-	}
 }
 
 int	checking(t_philo_args *arg)
@@ -110,13 +54,13 @@ int	checking(t_philo_args *arg)
 
 int	get_fork(t_philo *philo)
 {
-	if (philo->args->nb_philo == 1)
-	{  
-		pthread_mutex_lock(&(philo->args->forks[philo->left_fork]));
-		print(philo, philo->id, "has taken a fork");
-		pthread_mutex_unlock(&(philo->args->forks[philo->left_fork]));
-		return (1);
-	}
+	// if (philo->args->nb_philo == 1)
+	// {  
+	// 	pthread_mutex_lock(&(philo->args->forks[philo->left_fork]));
+	// 	print(philo, philo->id, "has taken a fork");
+	// 	pthread_mutex_unlock(&(philo->args->forks[philo->left_fork]));
+	// 	return (1);
+	// }
 	pthread_mutex_lock(&(philo->args->forks[philo->left_fork]));
 	print(philo, philo->id, "has taken a fork"); 
 	pthread_mutex_lock(&(philo->args->forks[philo->right_fork]));
@@ -165,20 +109,6 @@ void	*philo_routine(void *data)
 		print(philo, philo->id, "is thinking");
 	}
 	return (0);
-}
-
-long	get_time(void)
-{
-	struct timeval	time;
-	long			result;
-
-	if (gettimeofday(&time, NULL))
-	{
-		write(2, "Error\n", 6);
-		return (0);
-	}
-	result = ((size_t)time.tv_sec * 1000) + ((size_t)time.tv_usec / 1000);
-	return (result);
 }
 
 int	check_args(t_philo_args *args, char **av)
@@ -246,10 +176,56 @@ pthread_mutex_t	*init_forks(int nb_forks)
 	return (forks);
 }
 
+int	philo_dead(t_philo *philo)
+{
+	long	now_time;
+
+	now_time = get_time();
+	if ((now_time - last_eat(philo)) >= philo->args->time_to_die)
+	{
+		print(philo, philo->id, "died");
+		return (1);
+	}
+	return (0);
+}
+
+void	cleaning(t_philo_args *args, t_philo *philos)
+{
+	int	i;
+
+	i = 0;
+	while (i < args->nb_philo)
+	{
+		pthread_mutex_destroy(&philos[i].print);
+		pthread_mutex_destroy(&philos[i].mutex_last_eat);
+		pthread_mutex_destroy(&args->forks[i]);
+		i++;
+	}
+	free(args->forks);
+	free(philos);
+}
+void	*monitoring(void *data)
+{
+	t_philo		*philos;
+
+	philos = (t_philo *)data;
+	while (1)
+	{
+		if (philo_dead(philos))
+		{
+			change_monitor(philos[0].args);
+			return (0);
+		}
+	}
+	return (0);
+}
+
 int	main(int ac, char *av[])
 {
 	t_philo			*philos;
 	t_philo_args	args;
+	pthread_t		monitor;
+	int				i;
 
 	if (ac < 5 || ac > 6)
 	{
@@ -268,18 +244,34 @@ int	main(int ac, char *av[])
 		write(2, "Error\n", 6);
 		return (1);
 	}
-	int i = 0;
+	if (pthread_create(&monitor, NULL, (void *)monitoring, &args))
+	{
+		write(2, "Error\n", 6);
+		return (1);
+	}
+	i = 0;
 	while (i < args.nb_philo)
 	{
-		pthread_mutex_lock(&philos[i].mutex_last_eat);
-		philos[i].last_eat = get_time();
-		pthread_mutex_unlock(&philos[i].mutex_last_eat);
-		philos[i].last_time = get_time();
-		if (pthread_create(&(philos[i].thread), NULL, philo_routine, &philos[i]))
+		philos[i].start_time = get_time();
+		if (pthread_create(&(philos[i].thread), NULL, (void *)philo_routine, &philos[i]))
 			return (1);
 		i++;
 	}
-	// cleaning(&args, philos);
-	
+	if (pthread_join(monitor, NULL))
+	{
+		write(2, "Error\n", 6);
+		return (1);
+	}
+	i = 0;
+	while (i < args.nb_philo)
+	{
+		if (pthread_join(philos[i].thread, NULL))
+		{
+			write(2, "Error\n", 6);
+			return (1);
+		}
+		i++;
+	}
+	cleaning(&args, philos);
 	return (0);
 }
