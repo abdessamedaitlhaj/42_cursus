@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:38:43 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/09/08 18:08:04 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/09/23 19:24:42 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,11 @@ typedef struct s_philo_args
 	int				time_to_eat;
 	int				time_to_sleep;
 	int				nb_must_eat;
-	int				monitor;
 	int				life_time;
 	pthread_mutex_t	*forks;
-	pthread_mutex_t	mutex_monitor;
+	pthread_mutex_t	print;
+	pthread_mutex_t	mutex_last_eat;
+	pthread_mutex_t	mutex_eat_count;
 }	t_philo_args;
 
 typedef struct s_philo
@@ -38,16 +39,12 @@ typedef struct s_philo
 	int				id;
 	int				right_fork;
 	int				left_fork;
-	int				last_meal;
 	long			last_eat;
 	long			start_time;
 	int				eat_count;
+	int				dead;
 	pthread_t		thread;
 	t_philo_args	*args;
-	pthread_mutex_t	print;
-	pthread_mutex_t	mutex_eat_cnt;
-	pthread_mutex_t	mutex_last_eat;
-	pthread_mutex_t	mutex_eat_count;
 }	t_philo;
 
 void	error(void);
@@ -56,7 +53,7 @@ int		ft_atoi(char const *str, char *flag);
 int		ft_isspace(int c);
 int		ft_isdigit(int c);
 char	**ft_split(char const *s, char c);
-int	checking(t_philo_args *arg);
+int		checking(t_philo_args *arg);
 
 
 long get_time(void);
