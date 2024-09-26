@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:40:28 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/09/25 22:26:33 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/09/26 22:03:35 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	print(t_philo *philo, int id, char *str)
 	pthread_mutex_unlock(&philo->args->print);
 }
 
-int	get_fork(t_philo *philo)
+int	take_fork(t_philo *philo)
 {
 	if (philo->args->nb_philo == 1)
 	{  
@@ -58,14 +58,12 @@ void	*philo_routine(void *data)
 
 	philo = (t_philo *)data;
 	if (philo->id % 2 == 0)
-		usleep(100);
+		ft_usleep(100);
 	while (!philo->args->dead)
 	{
-		if (get_fork(philo))
+		if (take_fork(philo))
 			break ;
 		philo_eating(philo);
-		if (philo->args->dead)
-			break ;
 		print(philo, philo->id, "is sleeping");
 		ft_usleep(philo->args->time_to_sleep);
 		print(philo, philo->id, "is thinking");
@@ -73,7 +71,7 @@ void	*philo_routine(void *data)
 	return (0);
 }
 
-void	cleaning(t_philo_args *args)
+void	clean_up(t_philo_args *args)
 {
 	int	i;
 
@@ -123,6 +121,6 @@ int	main(int ac, char *av[])
 	}
 	if (pthread_join(monitor, NULL))
 		return (write(2, "Error\n", 6));
-	cleaning(&args);
+	clean_up(&args);
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 22:23:02 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/09/25 22:28:02 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/09/26 20:49:47 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,11 @@ int	philos_eat(t_philo *philos)
 	while (i < nb_philo)
 	{
 		if (args->nb_must_eat != -1 && get_eat_count(philos[i]) >= args->nb_must_eat)
+		{
+			print(&philos[i], philos[i].id, "died");
+			args->dead = 1;
 			return (1);
+		}
 		i++;
 	}
 	return (0);
@@ -86,7 +90,8 @@ void	*monitoring(void *data)
 	while (1)
 	{
 		if (philo_dead(philos) || philos_eat(philos))
-			break;
+			break ;
+		ft_usleep(10);
 	}
 	return (0);
 }

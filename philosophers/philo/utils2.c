@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 09:00:51 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/09/08 17:56:52 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/09/26 21:57:42 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,7 @@ long	get_time(void)
 	long result;
 
 	if (gettimeofday(&time, NULL))
-	{
-		write(2, "Error\n", 6);
-		return (0);
-	}
+		return (write(2, "Error\n", 6));
 	result = ((size_t)time.tv_sec * 1000) + ((size_t)time.tv_usec / 1000);
 	return (result);
 }
