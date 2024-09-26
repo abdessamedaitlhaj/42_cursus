@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:38:43 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/09/26 22:03:15 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/09/26 22:40:39 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,5 @@ void			philo_eating(t_philo *philo);
 void			*philo_routine(void *data);
 void			clean_up(t_philo_args *args);
 int				get_eat_count(t_philo philo);
-
-
 
 #endif
