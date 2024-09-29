@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:38:43 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/09/29 22:28:18 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/09/26 22:40:39 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,10 @@ typedef struct s_philo_args
 	int				life_time;
 	int				dead;
 	int				start;
-	sem_t			*fork;
-	sem_t			*print;
-	sem_t			*die;
+	pthread_mutex_t	*forks;
+	pthread_mutex_t	print;
+	pthread_mutex_t	mutex_last_eat;
+	pthread_mutex_t	mutex_eat_count;
 }	t_philo_args;
 
 typedef struct s_philo
