@@ -6,7 +6,11 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:38:43 by aait-lha          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2024/10/01 02:37:22 by aait-lha         ###   ########.fr       */
+=======
+/*   Updated: 2024/10/02 16:36:49 by aait-lha         ###   ########.fr       */
+>>>>>>> 2c23d5d0d5401744fe578f1f478a302e1f0ccae0
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +36,13 @@ typedef struct s_philo_args
 	int				start;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	print;
+<<<<<<< HEAD
 	pthread_mutex_t	last_eat;
 	pthread_mutex_t	eat_count;
+=======
+	pthread_mutex_t	mutex_last_eat;
+	pthread_mutex_t	mutex_eat_count;
+>>>>>>> 2c23d5d0d5401744fe578f1f478a302e1f0ccae0
 }	t_philo_args;
 
 typedef struct s_philo
