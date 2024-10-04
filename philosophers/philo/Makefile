@@ -1,8 +1,8 @@
-SRCS =	philo.c utils1.c utils2.c inits.c parsing.c monitor.c
+SRCS =	philo.c utils.c inits.c parsing.c monitor.c routine.c
 
 OBJS = $(SRCS:.c=.o)
 RM = rm -f
-CFLAGS = -pthread -g
+CFLAGS = -pthread -fsanitize=thread -g
 
 
 
@@ -17,7 +17,7 @@ NAME = philo
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	cc $(CFLAGS) -o $(NAME) $(OBJS) -fsanitize=address
+	cc $(CFLAGS) -o $(NAME) $(OBJS)
 
 $(OBJS): %.o: %.c philo.h
 	cc $(CFLAGS) -c $< -o $@

@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 22:14:16 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/09/25 22:15:18 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/04 19:10:34 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,7 @@ int	init_data(t_philo_args *args, t_philo **philos)
 	pthread_mutex_init(&args->print, NULL);
 	pthread_mutex_init(&args->mutex_last_eat, NULL);
 	pthread_mutex_init(&args->mutex_eat_count, NULL);
+	pthread_mutex_init(&args->mutex_dead, NULL);
 	*philos = init_philos(args);
 	args->forks = init_forks(args->nb_philo);
 	if (!*philos || !args->forks)

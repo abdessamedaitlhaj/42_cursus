@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils2.c                                           :+:      :+:    :+:   */
+/*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 09:00:51 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/02 17:39:48 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/04 17:53:08 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 long	get_time(void)
 {
 	struct timeval	time;
-	long result;
+	long			result;
 
 	if (gettimeofday(&time, NULL))
 		return (write(2, "Error\n", 6));
@@ -25,7 +25,7 @@ long	get_time(void)
 
 void	ft_usleep(long sleep_time)
 {
-	long start;
+	long	start;
 
 	start = get_time();
 	while (start + sleep_time > get_time())

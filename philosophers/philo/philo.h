@@ -6,23 +6,19 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:38:43 by aait-lha          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2024/10/01 02:37:22 by aait-lha         ###   ########.fr       */
-=======
-/*   Updated: 2024/10/02 16:36:49 by aait-lha         ###   ########.fr       */
->>>>>>> 2c23d5d0d5401744fe578f1f478a302e1f0ccae0
+/*   Updated: 2024/10/04 19:10:14 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
-#define PHILO_H
+# define PHILO_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <time.h>
-#include <pthread.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <unistd.h>
+# include <sys/time.h>
+# include <time.h>
+# include <pthread.h>
 
 typedef struct s_philo_args
 {
@@ -33,16 +29,11 @@ typedef struct s_philo_args
 	int				nb_must_eat;
 	int				life_time;
 	int				dead;
-	int				start;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	print;
-<<<<<<< HEAD
-	pthread_mutex_t	last_eat;
-	pthread_mutex_t	eat_count;
-=======
+	pthread_mutex_t	mutex_dead;
 	pthread_mutex_t	mutex_last_eat;
 	pthread_mutex_t	mutex_eat_count;
->>>>>>> 2c23d5d0d5401744fe578f1f478a302e1f0ccae0
 }	t_philo_args;
 
 typedef struct s_philo
@@ -59,7 +50,7 @@ typedef struct s_philo
 
 void			error(void);
 void			free_args(char **args);
-int				ft_atoi(char const *str, char *flag);
+int				ft_atoi(char const *str);
 int				ft_isspace(int c);
 int				ft_isdigit(int c);
 char			**ft_split(char const *s, char c);
@@ -68,7 +59,7 @@ long			get_time(void);
 int				checking(t_philo_args *arg);
 void			ft_usleep(long sleep_time);
 int				philo_dead(t_philo *philos);
-int				get_eat_count(t_philo philo);
+int				get_eat_count(t_philo *philo);
 int				philos_eat(t_philo *philos);
 void			*monitoring(void *data);
 t_philo			*init_philos(t_philo_args *args);
@@ -81,6 +72,6 @@ int				take_fork(t_philo *philo);
 void			philo_eating(t_philo *philo);
 void			*philo_routine(void *data);
 void			clean_up(t_philo_args *args);
-int				get_eat_count(t_philo philo);
+int				get_dead(t_philo *philo);
 
 #endif
