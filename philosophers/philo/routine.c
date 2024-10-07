@@ -6,11 +6,21 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:45:12 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/04 19:13:25 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/07 20:03:06 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+int	get_dead(t_philo *philo)
+{
+	int	dead;
+
+	pthread_mutex_lock(&philo->args->mutex_dead);
+	dead = philo->args->dead;
+	pthread_mutex_unlock(&philo->args->mutex_dead);
+	return (dead);
+}
 
 void	print(t_philo *philo, int id, char *str)
 {
@@ -36,52 +46,56 @@ int	take_fork(t_philo *philo)
 	print(philo, philo->id, "has taken a fork");
 	pthread_mutex_lock(&(philo->args->forks[philo->right_fork]));
 	print(philo, philo->id, "has taken a fork");
+
+	pthread_mutex_lock(&philo->mutex_last_eat);
+	philo->last_eat = get_time();
+	pthread_mutex_unlock(&philo->mutex_last_eat);
 	return (0);
 }
 
 void	philo_eating(t_philo *philo)
 {
 	print(philo, philo->id, "is eating");
-	pthread_mutex_lock(&philo->args->mutex_last_eat);
-	philo->last_eat = get_time();
-	pthread_mutex_unlock(&philo->args->mutex_last_eat);
-	ft_usleep(philo->args->time_to_eat);
-	pthread_mutex_lock(&philo->args->mutex_eat_count);
-	philo->eat_count++;
-	pthread_mutex_unlock(&philo->args->mutex_eat_count);
+	ft_usleep(philo->args->sleep_time);
+	pthread_mutex_lock(&philo->mutex_eat_count);
+    philo->eat_count++;
+	pthread_mutex_unlock(&philo->mutex_eat_count);
 	pthread_mutex_unlock(&(philo->args->forks[philo->left_fork]));
 	pthread_mutex_unlock(&(philo->args->forks[philo->right_fork]));
 }
 
-int	get_dead(t_philo *philo)
+int	get_eat_count(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->args->mutex_dead);
-	if (philo->args->dead)
-	{
-		pthread_mutex_unlock(&philo->args->mutex_dead);
-		return (1);
-	}
-	pthread_mutex_unlock(&philo->args->mutex_dead);
-	return (0);
+	int	count;
+
+	pthread_mutex_lock(&philo->mutex_eat_count);
+	count = philo->eat_count;
+	pthread_mutex_unlock(&philo->mutex_eat_count);
+	return (count);
 }
 
 void	*philo_routine(void *data)
 {
 	t_philo		*philo;
+	int			meals;
 
 	philo = (t_philo *)data;
+	pthread_mutex_lock(&philo->mutex_last_eat);
+	philo->last_eat = get_time();
+	pthread_mutex_unlock(&philo->mutex_last_eat);
 	if (philo->id % 2 == 0)
-		ft_usleep(100);
+		ft_usleep(philo->args->eat_time);
+	meals = philo->args->meals;
 	while (!get_dead(philo))
 	{
 		if (take_fork(philo))
 			break ;
 		philo_eating(philo);
-		if (get_eat_count(philo) >= philo->args->nb_must_eat)
-			break ;
 		print(philo, philo->id, "is sleeping");
-		ft_usleep(philo->args->time_to_sleep);
+		ft_usleep(philo->args->sleep_time);
 		print(philo, philo->id, "is thinking");
+		// if (meals != -1 && get_eat_count(philo) > meals)
+    	// 	break;
 	}
-	return (0);
+	return (NULL);
 }

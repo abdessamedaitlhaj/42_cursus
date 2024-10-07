@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 22:14:16 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/04 19:10:34 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/07 20:13:55 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ t_philo	*init_philos(t_philo_args *args)
 	return (philos);
 }
 
-pthread_mutex_t	*init_forks(int nb_forks)
+pthread_mutex_t	*init_forks(int nb_forks, t_philo *philo)
 {
 	pthread_mutex_t	*forks;
 	int				i;
@@ -57,20 +57,26 @@ pthread_mutex_t	*init_forks(int nb_forks)
 			write (2, "Error\n", 6);
 			return (NULL);
 		}
+		pthread_mutex_init(&philo[i].mutex_eat_count, NULL);
+		pthread_mutex_init(&philo[i].mutex_last_eat, NULL);
 		i++;
 	}
+	pthread_mutex_init(&philo[0].args->mutex_flag, NULL);
+	pthread_mutex_init(&philo[0].args->mutex_dead, NULL);
 	return (forks);
 }
 
 int	init_data(t_philo_args *args, t_philo **philos)
 {
 	pthread_mutex_init(&args->print, NULL);
-	pthread_mutex_init(&args->mutex_last_eat, NULL);
-	pthread_mutex_init(&args->mutex_eat_count, NULL);
-	pthread_mutex_init(&args->mutex_dead, NULL);
 	*philos = init_philos(args);
-	args->forks = init_forks(args->nb_philo);
-	if (!*philos || !args->forks)
+	if (!*philos)
 		return (1);
+	args->forks = init_forks(args->nb_philo, *philos);
+	if (!args->forks)
+	{
+		free(*philos);
+		return (1);
+	}
 	return (0);
 }

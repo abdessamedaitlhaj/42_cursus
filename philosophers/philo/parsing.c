@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 22:15:28 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/04 19:11:59 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/07 20:05:22 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,24 +72,25 @@ int	ft_atoi(char const *str)
 int	check_args(t_philo_args *args, char **av)
 {
 	args->nb_philo = ft_atoi(av[1]);
-	args->time_to_die = ft_atoi(av[2]);
-	args->time_to_eat = ft_atoi(av[3]);
-	args->time_to_sleep = ft_atoi(av[4]);
-	if (args->nb_philo < 1 || args->time_to_die < 0 || \
-	args->time_to_eat < 0 || \
-	args->time_to_sleep < 0)
+	args->die_time = ft_atoi(av[2]);
+	args->eat_time = ft_atoi(av[3]);
+	args->sleep_time = ft_atoi(av[4]);
+	if (args->nb_philo < 1 || args->die_time < 0 || \
+	args->eat_time < 0 || \
+	args->sleep_time < 0)
 		return (1);
 	if (av[5])
 	{
-		args->nb_must_eat = ft_atoi(av[5]);
-		if (args->nb_must_eat <= 0)
+		args->meals = ft_atoi(av[5]);
+		if (args->meals <= 0)
 			return (1);
 	}
 	else
-		args->nb_must_eat = -1;
-	if (args->time_to_die < 60 || args->time_to_eat < 60 || \
-	args->time_to_sleep < 60 || args->nb_philo > 200)
+		args->meals = -1;
+	if (args->die_time < 60 || args->eat_time < 60 || \
+	args->sleep_time < 60 || args->nb_philo > 200)
 		return (1);
 	args->dead = 0;
+	args->flag = 0;
 	return (0);
 }
