@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:45:12 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/07 20:03:06 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/08 18:14:56 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,20 +46,22 @@ int	take_fork(t_philo *philo)
 	print(philo, philo->id, "has taken a fork");
 	pthread_mutex_lock(&(philo->args->forks[philo->right_fork]));
 	print(philo, philo->id, "has taken a fork");
-
-	pthread_mutex_lock(&philo->mutex_last_eat);
-	philo->last_eat = get_time();
-	pthread_mutex_unlock(&philo->mutex_last_eat);
 	return (0);
 }
 
 void	philo_eating(t_philo *philo)
 {
 	print(philo, philo->id, "is eating");
-	ft_usleep(philo->args->sleep_time);
-	pthread_mutex_lock(&philo->mutex_eat_count);
-    philo->eat_count++;
-	pthread_mutex_unlock(&philo->mutex_eat_count);
+	pthread_mutex_lock(&philo->mutex_last_eat);
+	philo->last_eat = get_time();
+	pthread_mutex_unlock(&philo->mutex_last_eat);
+	ft_usleep(philo->args->eat_time);
+	if (philo->args->meals != -1)
+	{
+		pthread_mutex_lock(&philo->mutex_eat_count);
+		philo->eat_count++;
+		pthread_mutex_unlock(&philo->mutex_eat_count);
+	}
 	pthread_mutex_unlock(&(philo->args->forks[philo->left_fork]));
 	pthread_mutex_unlock(&(philo->args->forks[philo->right_fork]));
 }
@@ -80,9 +82,6 @@ void	*philo_routine(void *data)
 	int			meals;
 
 	philo = (t_philo *)data;
-	pthread_mutex_lock(&philo->mutex_last_eat);
-	philo->last_eat = get_time();
-	pthread_mutex_unlock(&philo->mutex_last_eat);
 	if (philo->id % 2 == 0)
 		ft_usleep(philo->args->eat_time);
 	meals = philo->args->meals;
@@ -94,8 +93,8 @@ void	*philo_routine(void *data)
 		print(philo, philo->id, "is sleeping");
 		ft_usleep(philo->args->sleep_time);
 		print(philo, philo->id, "is thinking");
-		// if (meals != -1 && get_eat_count(philo) > meals)
-    	// 	break;
+		if (meals != -1 && get_eat_count(philo) >= meals)
+    		break;
 	}
 	return (NULL);
 }

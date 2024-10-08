@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:40:28 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/07 20:22:39 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/08 19:00:52 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,9 @@ int	create_threads(t_philo *philos, t_philo_args *args)
 	while (i < args->nb_philo)
 	{
 		philos[i].start_time = start_time;
+		pthread_mutex_lock(&philos[i].mutex_last_eat);
+		philos[i].last_eat = start_time;
+		pthread_mutex_unlock(&philos[i].mutex_last_eat);
 		if (pthread_create(&(philos[i].thread), NULL, \
 		(void *)philo_routine, &philos[i]))
 			return (1);
@@ -66,11 +69,6 @@ int	create_threads(t_philo *philos, t_philo_args *args)
 	return (0);
 }
 
-void f()
-{
-	system("leaks philo");
-}
-
 int	main(int ac, char *av[])
 {
 	pthread_t		monitor;
@@ -78,7 +76,6 @@ int	main(int ac, char *av[])
 	t_philo_args	args;
 	int				i;
 
-	// atexit(f);
 	if (ac < 5 || ac > 6)
 		return (write(2, "Error\n", 6));
 	if (check_args(&args, av))

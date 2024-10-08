@@ -2,7 +2,7 @@ SRCS =	philo.c utils.c inits.c parsing.c monitor.c routine.c
 
 OBJS = $(SRCS:.c=.o)
 RM = rm -f
-CFLAGS = -pthread -g -fsanitize=thread
+CFLAGS = -pthread #-g -fsanitize=thread
 
 
 
