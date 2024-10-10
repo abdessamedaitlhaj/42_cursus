@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   parsing_bonus.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/10 08:43:42 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/09/04 09:54:14 by aait-lha         ###   ########.fr       */
+/*   Created: 2024/09/25 22:15:28 by aait-lha          #+#    #+#             */
+/*   Updated: 2024/10/10 17:29:39 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "philo.h"
+#include "philo_bonus.h"
 
 void	free_args(char **args)
 {
@@ -40,49 +40,57 @@ int	ft_isspace(int c)
 	return (0);
 }
 
-int	ft_atoi(char const *str, char *flag)
+int	ft_atoi(char const *str)
 {
-	int			sign;
 	long int	sum;
 
 	sum = 0;
-	sign = 1;
 	while (*str && ft_isspace(*str))
 		str++;
 	if (*str == '+' || *str == '-')
 	{
 		if (*str == '-')
-			sign *= -1;
+			return (-1);
 		str++;
 	}
 	if (!*str)
-	{
-		if (flag)
-			*flag = 'f';
-		return (0);
-	}
+		return (-1);
 	while (*str && ft_isdigit(*str))
 	{
-		sum = sum * 10 + sign * (*str - 48);
+		sum = sum * 10 + (*str - 48);
 		if (sum > 2147483647)
-		{
-			if (flag)
-				*flag = 'f';
-			return (0);
-		}
+			return (-1);
 		if (sum < -2147483648)
-		{
-			if (flag)
-				*flag = 'f';
-			return (0);
-		}
+			return (-1);
 		str++;
 	}
 	if (*str)
-	{
-		if (flag)
-			*flag = 'f';
-		return (0);
-	}
+		return (-1);
 	return (sum);
+}
+
+int	check_args(t_philo_args *args, char **av)
+{
+	args->nb_philo = ft_atoi(av[1]);
+	args->die_time = ft_atoi(av[2]);
+	args->eat_time = ft_atoi(av[3]);
+	args->sleep_time = ft_atoi(av[4]);
+	if (args->nb_philo < 1 || args->die_time < 0 || \
+	args->eat_time < 0 || \
+	args->sleep_time < 0)
+		return (1);
+	if (av[5])
+	{
+		args->meals = ft_atoi(av[5]);
+		if (args->meals <= 0)
+			return (1);
+	}
+	else
+		args->meals = -1;
+	if (args->die_time < 60 || args->eat_time < 60 || \
+	args->sleep_time < 60 || args->nb_philo > 200)
+		return (1);
+	args->dead = 0;
+	args->counter = 0;
+	return (0);
 }

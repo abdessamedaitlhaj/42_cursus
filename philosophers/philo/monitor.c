@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 22:23:02 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/08 18:26:53 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/10 19:40:16 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,26 +39,16 @@ void	*monitoring(void *data)
 	long			now_time;
 	int				i;
 	int				meals;
+	int				all_eat;
 
 	philos = (t_philo *)data;
 	args = philos[0].args;
 	while (!get_flag(args))
 		ft_usleep(10);
+	meals = args->meals;
+	all_eat = 1;
 	while (1)
 	{
-		meals = args->meals;
-		if (meals != -1)
-		{
-			i = 0;
-			while (i < args->nb_philo)
-			{
-				if (get_eat_count(&philos[i]) >= meals)
-					meals--;
-				i++;
-			}
-			if (meals == 0)
-				return (NULL);
-		}
 		i = 0;
 		while (i < args->nb_philo)
 		{
@@ -71,7 +61,11 @@ void	*monitoring(void *data)
 				pthread_mutex_unlock(&args->mutex_dead);
 				return (NULL);
 			}
+			if (meals != -1 && get_eat_count(&philos[i]) < meals)
+				all_eat = 0;
 			i++;
 		}
+		if (all_eat)
+			return (NULL);
 	}
 }

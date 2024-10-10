@@ -1,24 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.c                                            :+:      :+:    :+:   */
+/*   philo_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:40:28 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/04 01:06:56 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/10 18:58:55 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "philo.h"
+# include "philo_bonus.h"
 
 
 void	print(t_philo *philo, int id, char *str)
 {
 	long	now_time;
-	now_time = get_time() - philo->args->start_time;
+
 	sem_wait(philo->args->print);
-	printf("%ld %d %s\n", now_time, id, str);
+	now_time = get_time();
+	if (!philo->args->dead)
+		printf("%ld %d %s\n", now_time - philo->start_time, id, str);
 	sem_post(philo->args->print);
 }
 
@@ -38,74 +40,136 @@ int	take_fork(t_philo *philo)
 	return (0);
 } 
 
+
 void	philo_eating(t_philo *philo)
 {
 	print(philo, philo->id, "is eating");
+	sem_wait(philo->last_eat_sem);
 	philo->last_eat = get_time();
-	ft_usleep(philo->args->time_to_eat);
-	philo->eat_count++;
+	sem_post(philo->last_eat_sem);
+	ft_usleep(philo->args->eat_time);
+	//sem_wait(philo->eat_count_sem);
+	// philo->eat_count++;
+	//sem_post(philo->eat_count_sem);
 	sem_post(philo->args->fork);
 	sem_post(philo->args->fork);
 }
+
+long	get_last_eat(t_philo *philo)
+{
+	long	last_eat;
+
+	sem_wait(philo->last_eat_sem);
+	last_eat = philo->last_eat;
+	sem_post(philo->last_eat_sem);
+	return (last_eat);
+}
+
+// int	get_eat_count(t_philo *philo)
+// {
+// 	int	eat_count;
+
+// 	sem_wait(philo->eat_count_sem);
+// 	eat_count = philo->eat_count;
+// 	sem_post(philo->eat_count_sem);
+// 	return (eat_count);
+// }
 
 void	*monitor(void *data)
 {
 	t_philo		*philo;
+	long		now_time;
 
 	philo = (t_philo *)data;
 	while (1)
 	{
-		if (philo->args->nb_meals != -1 && philo->eat_count >= \
-			philo->args->nb_meals || \
-			philo->args->time_to_die < get_time() - philo->last_eat)
+		now_time = get_time();
+		if (now_time - get_last_eat(philo) >= philo->args->die_time)
 		{
 			print(philo, philo->id, "died");
-			exit(1);
+			sem_wait(philo->args->die);
+			philo->args->dead = 1;
+			sem_post(philo->args->die);
+			return (NULL);
 		}
+		//ft_usleep(100);
 	}
 }
 
+int	get_dead(t_philo *philo)
+{
+	int	dead;
+
+	sem_wait(philo->args->die);
+	dead = philo->args->dead;
+	sem_post(philo->args->die);
+	return (dead);
+}
+
+// void	delay_time(long time)
+// {
+// 	while (get_time() < time)
+// 		continue ;
+// }
+
+void	init_local_sem(t_philo *philo)
+{
+	sem_unlink("last_eat");
+	sem_unlink("eat_count");
+	philo->last_eat_sem = sem_open("last_eat", O_CREAT, 0644, 1);
+	philo->last_eat_sem = sem_open("eat_count", O_CREAT, 0644, 1);
+}
+
+void	clean_local_sem(t_philo *philo)
+{
+	sem_close(philo->last_eat_sem);
+	sem_close(philo->eat_count_sem);
+	sem_unlink("last_eat");
+	sem_unlink("eat_count");
+}
+
+void	set_start_time(t_philo *philo, int *counter)
+{
+	if (*counter == 0)
+	{
+		philo->args->start_time = get_time();
+		*counter = 1;
+	}
+}
 void	*philo_routine(void *data)
 {
 	t_philo		*philo;
+	sem_t		*last_eat_sem;
+	sem_t		*eat_count_sem;
 
 	philo = (t_philo *)data;
-	// if (philo->id % 2 == 0)
-	// 	ft_usleep(100);
+	//delay_time(philo->args->start_time);
+	sem_wait(philo->args->s);
+	init_local_sem(philo);
+	set_start_time(philo, &philo->args->counter);
+	sem_wait(philo->last_eat_sem);
+	philo->last_eat = philo->args->start_time;
+	sem_post(philo->last_eat_sem);
+	philo->start_time = philo->args->start_time;
+	if (philo->id % 2 == 0)
+		ft_usleep(100);
 	if (pthread_create(&philo->thread, NULL, (void *)monitor, philo))
 		return (NULL);
-	while (1)
+	while (!get_dead(philo))
 	{
 		if (take_fork(philo))
 			break ;
 		philo_eating(philo);
 		print(philo, philo->id, "is sleeping");
-		ft_usleep(philo->args->time_to_sleep);
+		ft_usleep(philo->args->sleep_time);
 		print(philo, philo->id, "is thinking");
 	}
+	if (pthread_join(philo->thread, NULL))
+		return (NULL);
+	clean_local_sem(philo);
+		return (NULL);
 	return (0);
 }
-
-int	check_args(t_philo_args *args, char **av)
-{
-	args->nb_philo = ft_atoi(av[1], NULL);
-	args->time_to_die = ft_atoi(av[2], NULL);
-	args->time_to_eat = ft_atoi(av[3], NULL);
-	args->time_to_sleep = ft_atoi(av[4], NULL);
-	if (av[5])
-		args->nb_meals = ft_atoi(av[5], NULL);
-	else
-		args->nb_meals = -1;
-	if (args->nb_philo < 1 || args->time_to_die < 0 || args->time_to_eat < 0
-		|| args->time_to_sleep < 0 || (av[5] && args->nb_meals <= 0))
-		return (1);
-	if (args->time_to_die < 60 || args->time_to_eat < 60 || args->time_to_sleep < 60 || args->nb_philo > 200)
-		return (1);
-	args->dead = 0;
-	args->start = 0;
-	return (0);
-}
-
 
 t_philo	*init_philos(t_philo_args *args)
 {
@@ -119,12 +183,11 @@ t_philo	*init_philos(t_philo_args *args)
 	while (i < args->nb_philo)
 	{
 		philos[i].id = i + 1;
-		philos[i].right_fork = i;
-		philos[i].left_fork = (i + 1) % args->nb_philo;
 		philos[i].last_eat = 0;
 		philos[i].eat_count = 0;
 		philos[i].thread = 0;
 		philos[i].args = args;
+		// philos[i].start_time = args->start_time;
 		i++;
 	}
 	return (philos);
@@ -135,26 +198,28 @@ int	init_data(t_philo_args *args)
 	sem_unlink("fork");
 	sem_unlink("print");
 	sem_unlink("die");
+	sem_unlink("s");
 	args->fork = sem_open("fork", O_CREAT, 0644, args->nb_philo);
-	if (args->fork == SEM_FAILED)
-		return (1);
 	args->print = sem_open("print", O_CREAT, 0644, 1);
-	if (args->print == SEM_FAILED)
-		return (1);
 	args->die = sem_open("die", O_CREAT, 0644, 1);
-	if (args->die == SEM_FAILED)
-		return (1);
+	args->s = sem_open("s", O_CREAT, 0644, 0);
 	return (0);
 }
 
-int	clean_up(t_philo_args *args)
+int	clean_up(t_philo_args *args, t_philo *philos, pid_t *pids)
 {
+	int	i;
+
 	sem_close(args->fork);
 	sem_close(args->print);
 	sem_close(args->die);
+	sem_close(args->s);
 	sem_unlink("fork");
 	sem_unlink("print");
 	sem_unlink("die");
+	sem_unlink("s");
+	free(philos);
+	free(pids);
 	return (0);
 }
 
@@ -179,22 +244,30 @@ int	main(int ac, char *av[])
 	pids = malloc(sizeof(pid_t) * args.nb_philo);
 	if (!pids)
 		return (write(2, "Error\n", 6));
-	args.start_time = get_time();
 	i = 0;
 	while (i < args.nb_philo)
 	{
-		philos[i].last_eat = get_time();
 		pids[i] = fork();
 		if (pids[i] == -1)
+		{
+			free(philos);
 			return (write(2, "Error\n", 6));
+		}
 		if (pids[i] == 0)
-			philo_routine(&philos[i]);
+			philo_routine(&philos[i]); 
 		i++;
+		if (i == args.nb_philo)
+		{
+			i = -1;
+			while (++i < args.nb_philo)
+				sem_post(args.s);
+			break ;
+		}
 	}
-	
-	while (waitpid(-1, &status, 0) > 0)
+	while (1)
 	{
-		if (WEXITSTATUS(status) != 0)
+		waitpid(-1, &status, 0);
+		if (status != 0)
 		{
 			i = 0;
 			while (i < args.nb_philo)
@@ -205,7 +278,7 @@ int	main(int ac, char *av[])
 			break ;
 		}
 	}
-	if (clean_up(&args))
+	if (clean_up(&args, philos, pids))
 		return (write(2, "Error\n", 6));
 	return (0);
 }

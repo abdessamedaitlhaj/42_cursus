@@ -1,4 +1,4 @@
-SRCS =	philo.c utils1.c utils2.c parsing.c monitor.c
+SRCS =	philo_bonus.c utils_bonus.c parsing_bonus.c monitor_bonus.c
 
 OBJS = $(SRCS:.c=.o)
 RM = rm -f
@@ -17,9 +17,9 @@ NAME = philo
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	cc $(CFLAGS) -o $(NAME) $(OBJS) -fsanitize=address
+	cc $(CFLAGS) -o $(NAME) $(OBJS)
 
-$(OBJS): %.o: %.c philo.h
+$(OBJS): %.o: %.c philo_bonus.h
 	cc $(CFLAGS) -c $< -o $@
 
 clean:
