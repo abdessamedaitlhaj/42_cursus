@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:38:43 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/10 17:26:54 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/11 19:45:55 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ typedef struct s_philo_args
 	sem_t			*die;
 	sem_t			*s;
 	int				counter;
+	pid_t			*pids;
 }	t_philo_args;
 
 
@@ -76,5 +77,5 @@ int				take_fork(t_philo *philo);
 void			philo_eating(t_philo *philo);
 void			*philo_routine(void *data);
 int				clean_up(t_philo_args *args, t_philo *philos, pid_t *pids);
-int				get_dead(t_philo *philo);
+void			wait_and_kill(pid_t *pids, int nb_philo);
 #endif

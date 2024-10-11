@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:38:43 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/07 20:12:01 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/11 18:37:53 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,9 @@ typedef struct s_philo_args
 	int				meals;
 	int				dead;
 	int				flag;
-	pthread_mutex_t	mutex_flag;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	print;
+	pthread_mutex_t	mutex_flag;
 	pthread_mutex_t	mutex_dead;
 }	t_philo_args;
 

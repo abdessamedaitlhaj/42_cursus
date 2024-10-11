@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:40:28 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/10 18:58:55 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/11 20:28:46 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,7 @@ void	print(t_philo *philo, int id, char *str)
 
 	sem_wait(philo->args->print);
 	now_time = get_time();
-	if (!philo->args->dead)
-		printf("%ld %d %s\n", now_time - philo->start_time, id, str);
+	printf("%ld %d %s\n", now_time - philo->start_time, id, str);
 	sem_post(philo->args->print);
 }
 
@@ -48,9 +47,9 @@ void	philo_eating(t_philo *philo)
 	philo->last_eat = get_time();
 	sem_post(philo->last_eat_sem);
 	ft_usleep(philo->args->eat_time);
-	//sem_wait(philo->eat_count_sem);
-	// philo->eat_count++;
-	//sem_post(philo->eat_count_sem);
+	sem_wait(philo->eat_count_sem);
+	philo->eat_count++;
+	sem_post(philo->eat_count_sem);
 	sem_post(philo->args->fork);
 	sem_post(philo->args->fork);
 }
@@ -65,59 +64,45 @@ long	get_last_eat(t_philo *philo)
 	return (last_eat);
 }
 
-// int	get_eat_count(t_philo *philo)
-// {
-// 	int	eat_count;
+int	get_eat_count(t_philo *philo)
+{
+	int	eat_count;
 
-// 	sem_wait(philo->eat_count_sem);
-// 	eat_count = philo->eat_count;
-// 	sem_post(philo->eat_count_sem);
-// 	return (eat_count);
-// }
+	sem_wait(philo->eat_count_sem);
+	eat_count = philo->eat_count;
+	sem_post(philo->eat_count_sem);
+	return (eat_count);
+}
 
 void	*monitor(void *data)
 {
 	t_philo		*philo;
 	long		now_time;
+	int			meals;
 
 	philo = (t_philo *)data;
+	meals = philo->args->meals;
 	while (1)
 	{
 		now_time = get_time();
 		if (now_time - get_last_eat(philo) >= philo->args->die_time)
 		{
-			print(philo, philo->id, "died");
-			sem_wait(philo->args->die);
-			philo->args->dead = 1;
-			sem_post(philo->args->die);
-			return (NULL);
+			sem_wait(philo->args->print);
+			printf("%ld %d died\n", get_time() - philo->start_time, philo->id);
+			exit(1);
 		}
-		//ft_usleep(100);
+		if (meals != -1 && get_eat_count(philo) >= meals)
+			exit(0);
+		ft_usleep(100);
 	}
 }
-
-int	get_dead(t_philo *philo)
-{
-	int	dead;
-
-	sem_wait(philo->args->die);
-	dead = philo->args->dead;
-	sem_post(philo->args->die);
-	return (dead);
-}
-
-// void	delay_time(long time)
-// {
-// 	while (get_time() < time)
-// 		continue ;
-// }
 
 void	init_local_sem(t_philo *philo)
 {
 	sem_unlink("last_eat");
 	sem_unlink("eat_count");
 	philo->last_eat_sem = sem_open("last_eat", O_CREAT, 0644, 1);
-	philo->last_eat_sem = sem_open("eat_count", O_CREAT, 0644, 1);
+	philo->eat_count_sem = sem_open("eat_count", O_CREAT, 0644, 1);
 }
 
 void	clean_local_sem(t_philo *philo)
@@ -143,7 +128,6 @@ void	*philo_routine(void *data)
 	sem_t		*eat_count_sem;
 
 	philo = (t_philo *)data;
-	//delay_time(philo->args->start_time);
 	sem_wait(philo->args->s);
 	init_local_sem(philo);
 	set_start_time(philo, &philo->args->counter);
@@ -155,7 +139,7 @@ void	*philo_routine(void *data)
 		ft_usleep(100);
 	if (pthread_create(&philo->thread, NULL, (void *)monitor, philo))
 		return (NULL);
-	while (!get_dead(philo))
+	while (1)
 	{
 		if (take_fork(philo))
 			break ;
@@ -163,6 +147,10 @@ void	*philo_routine(void *data)
 		print(philo, philo->id, "is sleeping");
 		ft_usleep(philo->args->sleep_time);
 		print(philo, philo->id, "is thinking");
+		sem_wait(philo->args->die);
+		if (philo->args->dead)
+			exit(1);
+		sem_post(philo->args->die);
 	}
 	if (pthread_join(philo->thread, NULL))
 		return (NULL);
@@ -223,13 +211,31 @@ int	clean_up(t_philo_args *args, t_philo *philos, pid_t *pids)
 	return (0);
 }
 
+void	wait_and_kill(pid_t *pids, int nb_philo)
+{
+	int	i;
+	int	status;
+
+	i = 0;
+	while (waitpid(-1, &status, 0) > 0)
+	{
+		if (WIFEXITED(status) != 0)
+		{
+			i = -1;
+			while (++i < nb_philo)
+				kill(pids[i], SIGKILL);
+			break ;
+		}
+		i++;
+	}
+}
+
 int	main(int ac, char *av[])
 {
 	pthread_t		monitor;
 	t_philo			*philos;
 	t_philo_args	args;
 	int				i;
-	pid_t			*pids;
 	int				status;
 
 	if (ac < 5 || ac > 6)
@@ -241,19 +247,19 @@ int	main(int ac, char *av[])
 	philos = init_philos(&args);
 	if (!philos)
 		return (write(2, "Error\n", 6));
-	pids = malloc(sizeof(pid_t) * args.nb_philo);
-	if (!pids)
+	args.pids = malloc(sizeof(pid_t) * args.nb_philo);
+	if (!args.pids)
 		return (write(2, "Error\n", 6));
 	i = 0;
 	while (i < args.nb_philo)
 	{
-		pids[i] = fork();
-		if (pids[i] == -1)
+		args.pids[i] = fork();
+		if (args.pids[i] == -1)
 		{
 			free(philos);
 			return (write(2, "Error\n", 6));
 		}
-		if (pids[i] == 0)
+		if (args.pids[i] == 0)
 			philo_routine(&philos[i]); 
 		i++;
 		if (i == args.nb_philo)
@@ -264,21 +270,8 @@ int	main(int ac, char *av[])
 			break ;
 		}
 	}
-	while (1)
-	{
-		waitpid(-1, &status, 0);
-		if (status != 0)
-		{
-			i = 0;
-			while (i < args.nb_philo)
-			{
-				kill(pids[i], SIGKILL);
-				i++;
-			}
-			break ;
-		}
-	}
-	if (clean_up(&args, philos, pids))
+	wait_and_kill(args.pids, args.nb_philo);
+	if (clean_up(&args, philos, args.pids))
 		return (write(2, "Error\n", 6));
 	return (0);
 }

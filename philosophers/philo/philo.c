@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:40:28 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/08 19:00:52 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/11 18:13:55 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int	create_threads(t_philo *philos, t_philo_args *args)
 			return (1);
 		i++;
 	}
-	args->flag = 1;
+	//args->flag = 1;
 	return (0);
 }
 

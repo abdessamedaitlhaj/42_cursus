@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:45:12 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/08 18:14:56 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/11 18:41:49 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,8 +43,8 @@ int	take_fork(t_philo *philo)
 		return (1);
 	}
 	pthread_mutex_lock(&(philo->args->forks[philo->left_fork]));
-	print(philo, philo->id, "has taken a fork");
 	pthread_mutex_lock(&(philo->args->forks[philo->right_fork]));
+	print(philo, philo->id, "has taken a fork");
 	print(philo, philo->id, "has taken a fork");
 	return (0);
 }
@@ -56,12 +56,9 @@ void	philo_eating(t_philo *philo)
 	philo->last_eat = get_time();
 	pthread_mutex_unlock(&philo->mutex_last_eat);
 	ft_usleep(philo->args->eat_time);
-	if (philo->args->meals != -1)
-	{
-		pthread_mutex_lock(&philo->mutex_eat_count);
-		philo->eat_count++;
-		pthread_mutex_unlock(&philo->mutex_eat_count);
-	}
+	pthread_mutex_lock(&philo->mutex_eat_count);
+	philo->eat_count++;
+	pthread_mutex_unlock(&philo->mutex_eat_count);
 	pthread_mutex_unlock(&(philo->args->forks[philo->left_fork]));
 	pthread_mutex_unlock(&(philo->args->forks[philo->right_fork]));
 }
@@ -83,7 +80,7 @@ void	*philo_routine(void *data)
 
 	philo = (t_philo *)data;
 	if (philo->id % 2 == 0)
-		ft_usleep(philo->args->eat_time);
+		ft_usleep(100);
 	meals = philo->args->meals;
 	while (!get_dead(philo))
 	{

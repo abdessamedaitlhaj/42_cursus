@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 22:14:16 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/07 20:13:55 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/11 18:38:43 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,7 @@ t_philo	*init_philos(t_philo_args *args)
 		philos[i].id = i + 1;
 		philos[i].right_fork = i;
 		philos[i].left_fork = (i + 1) % args->nb_philo;
-		philos[i].last_eat = 0;
 		philos[i].eat_count = 0;
-		philos[i].thread = 0;
 		philos[i].args = args;
 		i++;
 	}
