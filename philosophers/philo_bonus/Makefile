@@ -2,7 +2,7 @@ SRCS =	philo_bonus.c utils_bonus.c parsing_bonus.c monitor_bonus.c
 
 OBJS = $(SRCS:.c=.o)
 RM = rm -f
-CFLAGS = -pthread #-g -fsanitize=address
+CFLAGS = #-pthread #-g -fsanitize=address
 
 
 

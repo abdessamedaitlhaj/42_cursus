@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 09:00:51 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/09 17:41:13 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/12 01:08:10 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,17 @@ long	get_time(void)
 	return (result);
 }
 
-void	ft_usleep(long sleep_time)
+void ft_usleep(long time)
 {
-	long start;
+    long long start;
+    long long now;
 
-	start = get_time();
-	while (start + (sleep_time * 1) > get_time())
-		usleep(100);
+    start = get_time();
+    while (1)
+    {
+        now = get_time();
+        if (now - start >= time)
+            break;
+        usleep(500);
+    }
 }

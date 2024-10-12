@@ -6,7 +6,7 @@
 /*   By: aait-lha <aait-lha@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 08:40:28 by aait-lha          #+#    #+#             */
-/*   Updated: 2024/10/11 20:28:46 by aait-lha         ###   ########.fr       */
+/*   Updated: 2024/10/12 01:05:47 by aait-lha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,7 @@ void	*monitor(void *data)
 
 	philo = (t_philo *)data;
 	meals = philo->args->meals;
+	ft_usleep(philo->args->eat_time);
 	while (1)
 	{
 		now_time = get_time();
@@ -91,9 +92,7 @@ void	*monitor(void *data)
 			printf("%ld %d died\n", get_time() - philo->start_time, philo->id);
 			exit(1);
 		}
-		if (meals != -1 && get_eat_count(philo) >= meals)
-			exit(0);
-		ft_usleep(100);
+		ft_usleep(1000);
 	}
 }
 
@@ -115,11 +114,13 @@ void	clean_local_sem(t_philo *philo)
 
 void	set_start_time(t_philo *philo, int *counter)
 {
+	sem_wait(philo->args->print);
 	if (*counter == 0)
 	{
 		philo->args->start_time = get_time();
 		*counter = 1;
 	}
+	sem_post(philo->args->print);
 }
 void	*philo_routine(void *data)
 {
@@ -136,7 +137,7 @@ void	*philo_routine(void *data)
 	sem_post(philo->last_eat_sem);
 	philo->start_time = philo->args->start_time;
 	if (philo->id % 2 == 0)
-		ft_usleep(100);
+		ft_usleep(philo->args->eat_time / 2);
 	if (pthread_create(&philo->thread, NULL, (void *)monitor, philo))
 		return (NULL);
 	while (1)
@@ -147,10 +148,6 @@ void	*philo_routine(void *data)
 		print(philo, philo->id, "is sleeping");
 		ft_usleep(philo->args->sleep_time);
 		print(philo, philo->id, "is thinking");
-		sem_wait(philo->args->die);
-		if (philo->args->dead)
-			exit(1);
-		sem_post(philo->args->die);
 	}
 	if (pthread_join(philo->thread, NULL))
 		return (NULL);
@@ -175,7 +172,6 @@ t_philo	*init_philos(t_philo_args *args)
 		philos[i].eat_count = 0;
 		philos[i].thread = 0;
 		philos[i].args = args;
-		// philos[i].start_time = args->start_time;
 		i++;
 	}
 	return (philos);
@@ -260,7 +256,10 @@ int	main(int ac, char *av[])
 			return (write(2, "Error\n", 6));
 		}
 		if (args.pids[i] == 0)
-			philo_routine(&philos[i]); 
+		{
+			philo_routine(&philos[i]);
+			exit(0);
+		}
 		i++;
 		if (i == args.nb_philo)
 		{
